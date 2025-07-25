@@ -11,6 +11,7 @@ using StokTakipApp.Models;
 public class ProductsApiController : ControllerBase
 {
     private readonly IConfiguration _config;
+
     public ProductsApiController(IConfiguration config)
     {
         _config = config;
@@ -102,9 +103,15 @@ public class ProductsApiController : ControllerBase
     {
         var connStr = _config.GetConnectionString("DefaultConnection");
         using var adapter = new DataAccessAdapter(connStr);
+
+        // Product silinmeden önce ona bağlı tüm StockTransaction kayıtları silinir
+        var stokHareketFilter = new RelationPredicateBucket(StockTransactionFields.ProductId == id);
+        adapter.DeleteEntitiesDirectly(typeof(StockTransactionEntity), stokHareketFilter);
+
         var product = new ProductEntity(id);
         if (!adapter.FetchEntity(product))
             return NotFound();
+
         adapter.DeleteEntity(product);
         return NoContent();
     }

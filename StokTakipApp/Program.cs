@@ -6,7 +6,6 @@ using stoktakip.DatabaseSpecific;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// LLBLGen ayarlarý
 RuntimeConfiguration.ConfigureDQE<PostgreSqlDQEConfiguration>(c =>
     c.AddDbProviderFactory(typeof(Npgsql.NpgsqlFactory))
 );
@@ -20,7 +19,6 @@ builder.Services.AddSwaggerGen(c =>
 
 var app = builder.Build();
 
-// Kültür ayarý
 var cultureInfo = new CultureInfo("en-US");
 CultureInfo.DefaultThreadCurrentCulture = cultureInfo;
 CultureInfo.DefaultThreadCurrentUICulture = cultureInfo;
@@ -36,10 +34,8 @@ app.UseRouting();
 
 app.UseAuthorization();
 
-// API Controllerlar ve MVC Controllerlar için gerekli!
-app.MapControllers(); // API Controllerlar için
+app.MapControllers();
 
-// Razor View'lar için klasik route (Products, Home vs.)
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Products}/{action=Index}/{id?}");
