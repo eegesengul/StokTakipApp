@@ -14,8 +14,8 @@
                 <dl class="row" id="productDetails">
                     <dt class="col-sm-3">Ad</dt>
                     <dd class="col-sm-9" id="name"></dd>
-                    <dt class="col-sm-3">Kategori ID</dt>
-                    <dd class="col-sm-9" id="categoryId"></dd>
+                    <dt class="col-sm-3">Kategori</dt>
+                    <dd class="col-sm-9" id="categoryName"></dd>
                     <dt class="col-sm-3">Stok</dt>
                     <dd class="col-sm-9" id="stockAmount"></dd>
                     <dt class="col-sm-3">Alış Fiyatı</dt>
@@ -33,22 +33,29 @@
 @section Scripts {
     <script>
         const id = window.location.pathname.split('/').pop();
-        fetch('/api/ProductsApi/' + id)
-            .then(x => {
+
+        // Hem kategoriler hem ürün aynı anda çekilir
+        Promise.all([
+            fetch('/api/CategoryApi').then(x => x.json()),
+            fetch('/api/ProductsApi/' + id).then(x => {
                 if (!x.ok) throw new Error("Kayıt bulunamadı");
                 return x.json();
             })
-            .then(p => {
-                document.getElementById('name').innerText = p.name;
-                document.getElementById('categoryId').innerText = p.categoryId;
-                document.getElementById('stockAmount').innerText = p.stockAmount;
-                document.getElementById('purchasePrice').innerText = p.purchasePrice;
-                document.getElementById('salePrice').innerText = p.salePrice;
-            })
-            .catch(err => {
-                document.getElementById('error').classList.remove('d-none');
-                document.getElementById('error').innerText = "Hata: " + err.message;
-            });
+        ]).then(([categories, product]) => {
+            // Kategori map'i oluştur
+            const categoryMap = {};
+            categories.forEach(c => categoryMap[c.id] = c.name);
+
+            // Ürün bilgilerini doldur
+            document.getElementById('name').innerText = product.name;
+            document.getElementById('categoryName').innerText = categoryMap[product.categoryId] || product.categoryId;
+            document.getElementById('stockAmount').innerText = product.stockAmount;
+            document.getElementById('purchasePrice').innerText = product.purchasePrice;
+            document.getElementById('salePrice').innerText = product.salePrice;
+        }).catch(err => {
+            document.getElementById('error').classList.remove('d-none');
+            document.getElementById('error').innerText = "Hata: " + err.message;
+        });
 
         document.getElementById('deleteForm').addEventListener('submit', function(e) {
             e.preventDefault();

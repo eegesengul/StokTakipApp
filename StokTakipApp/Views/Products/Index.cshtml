@@ -11,7 +11,7 @@
         <tr>
             <th>ID</th>
             <th>Ad</th>
-            <th>Kategori ID</th>
+            <th>Kategori</th>
             <th>Stok</th>
             <th>Alış Fiyatı</th>
             <th>Satış Fiyatı</th>
@@ -25,6 +25,17 @@
 
 @section Scripts {
     <script>
+        let categoryMap = {};
+
+        function fetchCategories() {
+            return fetch('/api/CategoryApi')
+                .then(x => x.json())
+                .then(categories => {
+                    categoryMap = {};
+                    categories.forEach(c => categoryMap[c.id] = c.name);
+                });
+        }
+
         function fetchProducts() {
             fetch('/api/ProductsApi')
                 .then(x => x.json())
@@ -32,10 +43,11 @@
                     let tbody = document.querySelector('#productsTable tbody');
                     tbody.innerHTML = "";
                     data.forEach(p => {
+                        let categoryName = categoryMap[p.categoryId] || p.categoryId;
                         let row = `<tr>
                             <td>${p.id}</td>
                             <td>${p.name}</td>
-                            <td>${p.categoryId}</td>
+                            <td>${categoryName}</td>
                             <td>${p.stockAmount}</td>
                             <td>${p.purchasePrice}</td>
                             <td>${p.salePrice}</td>
@@ -49,6 +61,8 @@
                 });
         }
 
-        document.addEventListener('DOMContentLoaded', fetchProducts);
+        document.addEventListener('DOMContentLoaded', function() {
+            fetchCategories().then(fetchProducts);
+        });
     </script>
 }

@@ -16,8 +16,10 @@
                     <input type="text" class="form-control" id="name" required />
                 </div>
                 <div class="mb-3">
-                    <label class="form-label">Kategori ID</label>
-                    <input type="number" class="form-control" id="categoryId" required />
+                    <label class="form-label">Kategori</label>
+                    <select class="form-control" id="categoryId" required>
+                        <option value="">Kategori seçiniz...</option>
+                    </select>
                 </div>
                 <div class="mb-3">
                     <label class="form-label">Stok</label>
@@ -41,22 +43,34 @@
 @section Scripts {
     <script>
         const id = window.location.pathname.split('/').pop();
-        fetch('/api/ProductsApi/' + id)
-            .then(x => {
-                if (!x.ok) throw new Error("Kayıt bulunamadı");
-                return x.json();
+
+        // Hem kategorileri hem ürünü çek, kategorileri doldurduktan sonra mevcut kategoriyi seçili yap
+        Promise.all([
+            fetch('/api/CategoryApi').then(resp => resp.json()),
+            fetch('/api/ProductsApi/' + id).then(resp => {
+                if (!resp.ok) throw new Error("Kayıt bulunamadı");
+                return resp.json();
             })
-            .then(p => {
-                document.getElementById('name').value = p.name;
-                document.getElementById('categoryId').value = p.categoryId;
-                document.getElementById('stockAmount').value = p.stockAmount;
-                document.getElementById('purchasePrice').value = p.purchasePrice;
-                document.getElementById('salePrice').value = p.salePrice;
-            })
-            .catch(err => {
-                document.getElementById('error').classList.remove('d-none');
-                document.getElementById('error').innerText = "Hata: " + err.message;
+        ])
+        .then(([categories, product]) => {
+            // Kategorileri doldur
+            const ddl = document.getElementById('categoryId');
+            ddl.innerHTML = `<option value="">Kategori seçiniz...</option>`;
+            categories.forEach(c => {
+                ddl.innerHTML += `<option value="${c.id}">${c.name}</option>`;
             });
+
+            // Diğer alanları doldur
+            document.getElementById('name').value = product.name;
+            document.getElementById('categoryId').value = product.categoryId;
+            document.getElementById('stockAmount').value = product.stockAmount;
+            document.getElementById('purchasePrice').value = product.purchasePrice;
+            document.getElementById('salePrice').value = product.salePrice;
+        })
+        .catch(err => {
+            document.getElementById('error').classList.remove('d-none');
+            document.getElementById('error').innerText = "Hata: " + err.message;
+        });
 
         document.getElementById('editForm').addEventListener('submit', function (e) {
             e.preventDefault();
