@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Npgsql" Version="9.0.3" />
+    <PackageReference Include="SD.LLBLGen.Pro.DQE.PostgreSql" Version="5.12.1" />
+    <PackageReference Include="SD.LLBLGen.Pro.ORMSupportClasses" Version="5.12.1" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="LLBLGenGenerated\DatabaseGeneric\stoktakip.csproj" />
+    <None Include="LLBLGenGenerated\DatabaseSpecific\stoktakipDBSpecific.csproj" />
+  </ItemGroup>
+
+</Project>

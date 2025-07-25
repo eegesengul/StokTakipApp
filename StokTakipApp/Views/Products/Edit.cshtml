@@ -1,0 +1,86 @@
+﻿@{
+    ViewData["Title"] = "Ürün Düzenle";
+    var id = Context.Request.Path.Value.Split('/').Last();
+}
+
+<div class="container my-5" style="max-width:600px;">
+    <div class="card shadow">
+        <div class="card-header">
+            <h4>Ürün Düzenle</h4>
+        </div>
+        <div class="card-body">
+            <div id="error" class="alert alert-danger d-none"></div>
+            <form id="editForm" autocomplete="off">
+                <div class="mb-3">
+                    <label class="form-label">Ad</label>
+                    <input type="text" class="form-control" id="name" required />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Kategori ID</label>
+                    <input type="number" class="form-control" id="categoryId" required />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Stok</label>
+                    <input type="number" class="form-control" id="stockAmount" required />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Alış Fiyatı</label>
+                    <input type="number" step="0.01" class="form-control" id="purchasePrice" required />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Satış Fiyatı</label>
+                    <input type="number" step="0.01" class="form-control" id="salePrice" required />
+                </div>
+                <button type="submit" class="btn btn-primary">Kaydet</button>
+                <a href="@Url.Action("Index", "Products")" class="btn btn-secondary">Listeye Dön</a>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        const id = window.location.pathname.split('/').pop();
+        fetch('/api/ProductsApi/' + id)
+            .then(x => {
+                if (!x.ok) throw new Error("Kayıt bulunamadı");
+                return x.json();
+            })
+            .then(p => {
+                document.getElementById('name').value = p.name;
+                document.getElementById('categoryId').value = p.categoryId;
+                document.getElementById('stockAmount').value = p.stockAmount;
+                document.getElementById('purchasePrice').value = p.purchasePrice;
+                document.getElementById('salePrice').value = p.salePrice;
+            })
+            .catch(err => {
+                document.getElementById('error').classList.remove('d-none');
+                document.getElementById('error').innerText = "Hata: " + err.message;
+            });
+
+        document.getElementById('editForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+            const data = {
+                id: parseInt(id),
+                name: document.getElementById('name').value,
+                categoryId: parseInt(document.getElementById('categoryId').value),
+                stockAmount: parseInt(document.getElementById('stockAmount').value),
+                purchasePrice: parseFloat(document.getElementById('purchasePrice').value),
+                salePrice: parseFloat(document.getElementById('salePrice').value)
+            };
+            fetch('/api/ProductsApi/' + id, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            })
+            .then(x => {
+                if (x.ok) window.location.href = '/Products';
+                else return x.text().then(t => { throw new Error(t); });
+            })
+            .catch(err => {
+                document.getElementById('error').classList.remove('d-none');
+                document.getElementById('error').innerText = "Hata: " + err.message;
+            });
+        });
+    </script>
+}

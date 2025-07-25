@@ -1,0 +1,54 @@
+﻿@{
+    ViewData["Title"] = "Ürünler";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0">Ürünler</h2>
+    <a href="@Url.Action("Create", "Products")" class="btn btn-success">+ Yeni Ürün Ekle</a>
+</div>
+<table class="table table-bordered table-striped table-hover" id="productsTable">
+    <thead class="table-dark">
+        <tr>
+            <th>ID</th>
+            <th>Ad</th>
+            <th>Kategori ID</th>
+            <th>Stok</th>
+            <th>Alış Fiyatı</th>
+            <th>Satış Fiyatı</th>
+            <th>İşlem</th>
+        </tr>
+    </thead>
+    <tbody>
+        <!-- JavaScript ile doldurulacak -->
+    </tbody>
+</table>
+
+@section Scripts {
+    <script>
+        function fetchProducts() {
+            fetch('/api/ProductsApi')
+                .then(x => x.json())
+                .then(data => {
+                    let tbody = document.querySelector('#productsTable tbody');
+                    tbody.innerHTML = "";
+                    data.forEach(p => {
+                        let row = `<tr>
+                            <td>${p.id}</td>
+                            <td>${p.name}</td>
+                            <td>${p.categoryId}</td>
+                            <td>${p.stockAmount}</td>
+                            <td>${p.purchasePrice}</td>
+                            <td>${p.salePrice}</td>
+                            <td>
+                                <a href="/Products/Edit/${p.id}" class="btn btn-primary btn-sm">Düzenle</a>
+                                <a href="/Products/Delete/${p.id}" class="btn btn-danger btn-sm">Sil</a>
+                            </td>
+                        </tr>`;
+                        tbody.innerHTML += row;
+                    });
+                });
+        }
+
+        document.addEventListener('DOMContentLoaded', fetchProducts);
+    </script>
+}

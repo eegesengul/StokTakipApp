@@ -1,0 +1,68 @@
+﻿@{
+    ViewData["Title"] = "Ürün Sil";
+    var id = Context.Request.Path.Value.Split('/').Last();
+}
+
+<div class="container my-5" style="max-width:600px;">
+    <div class="card shadow">
+        <div class="card-header">
+            <h4>Ürün Sil</h4>
+        </div>
+        <div class="card-body">
+            <div id="error" class="alert alert-danger d-none"></div>
+            <form id="deleteForm">
+                <dl class="row" id="productDetails">
+                    <dt class="col-sm-3">Ad</dt>
+                    <dd class="col-sm-9" id="name"></dd>
+                    <dt class="col-sm-3">Kategori ID</dt>
+                    <dd class="col-sm-9" id="categoryId"></dd>
+                    <dt class="col-sm-3">Stok</dt>
+                    <dd class="col-sm-9" id="stockAmount"></dd>
+                    <dt class="col-sm-3">Alış Fiyatı</dt>
+                    <dd class="col-sm-9" id="purchasePrice"></dd>
+                    <dt class="col-sm-3">Satış Fiyatı</dt>
+                    <dd class="col-sm-9" id="salePrice"></dd>
+                </dl>
+                <button type="submit" class="btn btn-danger">Sil</button>
+                <a href="@Url.Action("Index", "Products")" class="btn btn-secondary">Vazgeç</a>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        const id = window.location.pathname.split('/').pop();
+        fetch('/api/ProductsApi/' + id)
+            .then(x => {
+                if (!x.ok) throw new Error("Kayıt bulunamadı");
+                return x.json();
+            })
+            .then(p => {
+                document.getElementById('name').innerText = p.name;
+                document.getElementById('categoryId').innerText = p.categoryId;
+                document.getElementById('stockAmount').innerText = p.stockAmount;
+                document.getElementById('purchasePrice').innerText = p.purchasePrice;
+                document.getElementById('salePrice').innerText = p.salePrice;
+            })
+            .catch(err => {
+                document.getElementById('error').classList.remove('d-none');
+                document.getElementById('error').innerText = "Hata: " + err.message;
+            });
+
+        document.getElementById('deleteForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            fetch('/api/ProductsApi/' + id, {
+                method: 'DELETE'
+            })
+            .then(x => {
+                if (x.ok) window.location.href = '/Products';
+                else return x.text().then(t => { throw new Error(t); });
+            })
+            .catch(err => {
+                document.getElementById('error').classList.remove('d-none');
+                document.getElementById('error').innerText = "Hata: " + err.message;
+            });
+        });
+    </script>
+}
